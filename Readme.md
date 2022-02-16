@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг»
 
 * Студент: [Oxana Garascenco](https://up.htmlacademy.ru/javascript/25/user/122666).
-* Наставник: `Неизвестно`.
+* Наставник: [Роман Марченко](https://htmlacademy.ru/profile/id505487).
 
 ---
 
