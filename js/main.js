@@ -1,3 +1,2 @@
-import {getOffers} from './get-offers.js';
-
-getOffers();
+import {generateOffers} from './generate-similar-offers.js';
+generateOffers();
