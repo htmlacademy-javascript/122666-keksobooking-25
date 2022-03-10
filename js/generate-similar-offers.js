@@ -2,21 +2,12 @@ import {getOffers} from './get-offers.js';
 /**
 На основе временных данных для разработки и шаблона #card создайте DOM-элементы, соответствующие объявлениям, и заполните их данными:
 
-Выведите заголовок объявления offer.title в заголовок .popup__title.
 
-Выведите адрес offer.address в блок .popup__text--address.
 
-Выведите цену offer.price в блок .popup__text--price строкой вида {{offer.price}} ₽/ночь. Например, «5200 ₽/ночь».
-
-В блок .popup__type выведите тип жилья offer.type
-
-Выведите количество гостей и комнат offer.rooms и offer.guests в блок .popup__text--capacity строкой вида {{offer.rooms}} комнаты для {{offer.guests}} гостей. Например, «2 комнаты для 3 гостей».
-
-Время заезда и выезда offer.checkin и offer.checkout в блок .popup__text--time строкой вида Заезд после {{offer.checkin}}, выезд до {{offer.checkout}}. Например, «Заезд после 14:00, выезд до 14:00».
 
 В список .popup__features выведите все доступные удобства в объявлении.
 
-В блок .popup__description выведите описание объекта недвижимости offer.description.
+
 
 В блок .popup__photos выведите все фотографии из списка offer.photos. Каждая из строк массива photos должна записываться как атрибут src соответствующего изображения.
 
@@ -38,10 +29,11 @@ const offerTemplate = document.querySelector('#card').content.querySelector('.po
 const offersTargetElement = document.querySelector('#map-canvas');
 
 const generateOffers = ()=>{
-  offers.forEach(offer => {
+  offers.forEach(({author, location, offer}) => {
+    console.log(offer);
     const offerElement = offerTemplate.cloneNode(true);
     const offerTitleElement = offerElement.querySelector('.popup__title');
-    const offerAdressElement = offerElement.querySelector('.popup__text--address');
+    const offerAddressElement = offerElement.querySelector('.popup__text--address');
     const offerPriceElement = offerElement.querySelector('.popup__text--price');
     const offerTypeElement = offerElement.querySelector('.popup__type');
     const offerCapacityElement = offerElement.querySelector('.popup__text--capacity');
@@ -50,6 +42,15 @@ const generateOffers = ()=>{
     const offerDescriptionElement = offerElement.querySelector('.popup__description');
     const offerPhotosElement = offerElement.querySelector('.popup__photos');
     const offerAvatarElement = offerElement.querySelector('.popup__avatar');
+    offerTitleElement.textContent = offer.title;
+    offerAddressElement.textContent = offer.address;
+    offerPriceElement.textContent = `${offer.price} ₽/ночь`;
+    offerTypeElement.textContent = OFFER_TYPES[offer.type];
+    offerCapacityElement.textContent = `${offer.rooms} комнаты для ${offer.guests} гостей`;
+    offerChecktimeElement.textContent = `Заезд после ${offer.checkin}, выезд до ${offer.checkout}`;
+
+    offerDescriptionElement.textContent = offer.description;
+    offerAvatarElement.setAttribute('src',author.avatar);
     offersTargetElement.appendChild(offerElement);
   });
 
