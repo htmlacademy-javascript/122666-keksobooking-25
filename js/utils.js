@@ -31,8 +31,13 @@ const getFloatingPointNumber = (min, max, numberOfDigits)=>{
   return +result.toFixed(numberOfDigits);
 };
 
+const hideElement = (elm)=>{
+  elm.classList.add('hidden');
+};
+
 export {
   getFloatingPointNumber,
   getNumberFromRange,
   randomizeArr,
+  hideElement
 };

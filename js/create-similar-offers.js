@@ -1,9 +1,5 @@
 import {getOffers} from './get-offers.js';
-/**
-На основе временных данных для разработки и шаблона #card создайте DOM-элементы, соответствующие объявлениям, и заполните их данными:
-
-Предусмотрите ситуацию, когда данных для заполнения не хватает. Например, отсутствует описание. В этом случае соответствующий блок в карточке скрывается.
-*/
+import {hideElement} from './utils.js';
 
 const OFFER_TYPES = {
   flat: 'Квартира',
@@ -12,7 +8,6 @@ const OFFER_TYPES = {
   palace: 'Дворец',
   hotel: 'Отель'
 };
-
 const offers = getOffers();
 const offerTemplate = document.querySelector('#card').content.querySelector('.popup');
 const offersTargetElement = document.querySelector('#map-canvas');
@@ -33,34 +28,86 @@ const createSimilarOffers = ()=>{
     const offerPhotosElement = offerElement.querySelector('.popup__photos');
     const offerPhotoTemplate = offerPhotosElement.querySelector('.popup__photo');
     const offerAvatarElement = offerElement.querySelector('.popup__avatar');
-    offerTitleElement.textContent = offer.title;
-    offerAddressElement.textContent = offer.address;
-    offerPriceElement.textContent = `${offer.price} ₽/ночь`;
-    offerTypeElement.textContent = OFFER_TYPES[offer.type];
-    offerCapacityElement.textContent = `${offer.rooms} комнаты для ${offer.guests} гостей`;
-    offerChecktimeElement.textContent = `Заезд после ${offer.checkin}, выезд до ${offer.checkout}`;
-    offerFeaturesItems.forEach((featureItem) => {
-      const isNecessary = offer.features.some(
-        (feature) => featureItem.classList.contains(`popup__feature--${feature}`),
-      );
-      if (!isNecessary) {
-        featureItem.remove();
-      }
-    });
-    offerFeaturesListElement.innerHtml = offerFeaturesItems;
-    offerDescriptionElement.textContent = offer.description;
-    offerPhotosElement.innerHTML = '';
-    offer.photos.forEach((src)=> {
-      const image = offerPhotoTemplate.cloneNode();
-      image.setAttribute('src', src);
-      offerPhotosElement.appendChild(image);
-    });
-    offerAvatarElement.setAttribute('src',author.avatar);
+    const canShowAvatar = author && author.avatar;
+    const canShowTitle = offer && offer.title;
+    const canShowAddress = offer && offer.address;
+    const canShowPrice = offer && offer.price;
+    const canShowType = offer && offer.type;
+    const canShowCapacity = offer && offer.rooms && offer.guests;
+    const canShowChecktime = offer && offer.checkin && offer.checkout;
+    const canShowFeatures = offer && offer.features && offer.features.length;
+    const canShowDescription = offer && offer.description;
+    const canShowPhotos = offer && offer.photos && offer.photos.length;
+
+    if(canShowAvatar){
+      offerAvatarElement.setAttribute('src',author.avatar);
+    } else {
+      hideElement(offerAvatarElement);
+    }
+
+    if(canShowTitle){
+      offerTitleElement.textContent = offer.title;
+    } else {
+      hideElement(offerTitleElement);
+    }
+    if(canShowAddress){
+      offerAddressElement.textContent = offer.address;
+    } else {
+      hideElement(offerAddressElement);
+    }
+    if(canShowPrice){
+      offerPriceElement.textContent = `${offer.price} ₽/ночь`;
+    } else {
+      hideElement(offerPriceElement);
+    }
+    if(canShowType){
+      offerTypeElement.textContent = OFFER_TYPES[offer.type];
+    } else {
+      hideElement(offerTypeElement);
+    }
+    if(canShowCapacity){
+      offerCapacityElement.textContent = `${offer.rooms} комнаты для ${offer.guests} гостей`;
+    } else {
+      hideElement(offerCapacityElement);
+    }
+    if(canShowChecktime){
+      offerChecktimeElement.textContent = `Заезд после ${offer.checkin}, выезд до ${offer.checkout}`;
+    } else {
+      hideElement(offerChecktimeElement);
+    }
+
+    if(canShowFeatures){
+      offerFeaturesItems.forEach((featureItem) => {
+        const isNecessary = offer.features.some(
+          (feature) => featureItem.classList.contains(`popup__feature--${feature}`),
+        );
+        if (!isNecessary) {
+          featureItem.remove();
+        }
+      });
+      offerFeaturesListElement.innerHtml = offerFeaturesItems;
+    } else {
+      hideElement(offerFeaturesListElement);
+    }
+
+    if(canShowDescription){
+      offerDescriptionElement.textContent = offer.description;
+    } else {
+      hideElement(offerDescriptionElement);
+    }
+    if(canShowPhotos){
+      offerPhotosElement.innerHTML = '';
+      offer.photos.forEach((src)=> {
+        const image = offerPhotoTemplate.cloneNode();
+        image.setAttribute('src', src);
+        offerPhotosElement.appendChild(image);
+      });
+    } else {
+      hideElement(offerPhotosElement);
+    }
+
     offerElements.push(offerElement);
   });
-
   offersTargetElement.appendChild(offerElements[0]);
 };
-
-
 export {createSimilarOffers};
