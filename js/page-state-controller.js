@@ -1,3 +1,5 @@
+import {disableElements, enableElements} from './utils.js';
+
 const deactivatePage = ()=>{
   disableForm('.ad-form');
   disableForm('.map__filters');
@@ -12,9 +14,7 @@ const activatePage = ()=> {
 
 function enableForm(form){
   const disabledElms = form.querySelectorAll('[disabled]');
-  disabledElms.forEach((elm)=>{
-    elm.removeAttribute('disabled');
-  });
+  enableElements(disabledElms);
   form.classList.forEach((classStr)=>{
     if(classStr.includes('--disabled')){
       form.classList.remove(classStr);
@@ -24,28 +24,13 @@ function enableForm(form){
 
 function disableForm(selector){
   const form = document.querySelector(selector);
-  form.classList.add(`${selector.slice(1, selector.length - 1)}--disabled`);
   const selectElements = form.querySelectorAll('select:not(fieldset select)');
   const fieldsetElements = form.querySelectorAll('fieldset');
   const submitElm = form.querySelector('[type="submit"]');
-  const resetElm = form.querySelector('[type="submit"]');
-  disableElement(submitElm);
-  disableElement(resetElm);
-  disableElements(selectElements);
-  disableElements(fieldsetElements);
-}
+  const resetElm = form.querySelector('[type="reset"]');
 
-function disableElements(elmsArr){
-  if(elmsArr.length){
-    elmsArr.forEach((elm) => {
-      elm.setAttribute('disabled', '');
-    });
-  }
-}
-function disableElement(elm){
-  if(elm){
-    elm.setAttribute('disabled', '');
-  }
+  form.classList.add(`${selector.slice(1, selector.length)}--disabled`);
+  disableElements([...selectElements, ...fieldsetElements, submitElm, resetElm]);
 }
 
 export {deactivatePage, activatePage};

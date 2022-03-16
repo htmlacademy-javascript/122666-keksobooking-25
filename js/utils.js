@@ -35,9 +35,38 @@ const hideElement = (elm)=>{
   elm.classList.add('hidden');
 };
 
+const enableElement =(elm) => {
+  if(elm){
+    elm.removeAttribute('disabled');
+  }
+};
+
+const disableElement=(elm)=>{
+  if(elm){
+    elm.setAttribute('disabled', '');
+  }
+};
+
+const enableElements=(elms)=> {
+  if(elms.length){
+    elms.forEach((elm)=>{
+      enableElement(elm);
+    });
+  }
+};
+const disableElements=(elms)=>{
+  if(elms.length){
+    elms.forEach((elm) => {
+      disableElement(elm);
+    });
+  }
+};
+
 export {
   getFloatingPointNumber,
   getNumberFromRange,
   randomizeArr,
-  hideElement
+  hideElement,
+  disableElements,
+  enableElements,
 };
