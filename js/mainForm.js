@@ -1,4 +1,4 @@
-// import {validateForm} from './validation.js';
+import {initSlider} from './noUiSlider.js';
 import {disableElements, enableElements} from './utils.js';
 
 const form = document.querySelector('#main-form');
@@ -12,6 +12,30 @@ const MAX_CAPACITY_AMOUNT = {
   '2': 2,
   '3': 3,
 };
+
+const priceInput = form.querySelector('#price');
+const sliderElement = form.querySelector('#price-slider');
+
+const priceInputOptions = {
+  range: {
+    min: Number(priceInput.min),
+    max: Number(priceInput.max),
+  },
+  start: Number(priceInput.dataset.start),
+  step: Number(priceInput.dataset.step),
+  connect: 'lower',
+};
+
+initSlider(sliderElement, priceInputOptions);
+priceInput.addEventListener('change', onPriceInputChange);
+
+sliderElement.noUiSlider.on('update', () => {
+  priceInput.value = sliderElement.noUiSlider.get();
+});
+
+function onPriceInputChange(evt){
+  sliderElement.noUiSlider.set(evt.target.value);
+}
 
 const pristine = new Pristine(form, {
   classTo: 'ad-form__element',
