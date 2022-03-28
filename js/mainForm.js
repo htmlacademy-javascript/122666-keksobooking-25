@@ -1,5 +1,6 @@
 import {initSlider} from './noUiSlider.js';
 import {disableElements, enableElements} from './utils.js';
+import {sendData} from './api.js';
 
 const form = document.querySelector('#main-form');
 const capacityField = form.querySelector('#capacity');
@@ -12,6 +13,7 @@ const MAX_CAPACITY_AMOUNT = {
   '2': 2,
   '3': 3,
 };
+const FORM_ACTION = 'https://25.javascript.pages.academy/keksobooking';
 
 const priceInput = form.querySelector('#price');
 const sliderElement = form.querySelector('#price-slider');
@@ -72,8 +74,21 @@ function submitHandler(evt){
 
   const formIsValid = pristine.validate();
   if(formIsValid){
+    sendData(
+      FORM_ACTION,
+      () => onSuccess(),
+      (err) => onFail(err),
+      new FormData(evt.target)
+    );
     enableElements([submitBtn, resetBtn]);
   }
+}
+
+function onSuccess(){
+  console.log('success');
+}
+function onFail(err){
+  console.log(err);
 }
 
 export {mainFormHandler};
