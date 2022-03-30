@@ -1,4 +1,4 @@
-import {getOffers} from './get-offers.js';
+
 import {hideElement} from './utils.js';
 
 const OFFER_TYPES = {
@@ -8,11 +8,11 @@ const OFFER_TYPES = {
   palace: 'Дворец',
   hotel: 'Отель'
 };
-const offers = getOffers();
-const offerTemplate = document.querySelector('#card').content.querySelector('.popup');
-const offerElms = [];
 
-const getOfferElement = ({author, offer}) => {
+const offerTemplate = document.querySelector('#card').content.querySelector('.popup');
+
+
+const createOfferElement = ({author, offer}) => {
   const offerElement = offerTemplate.cloneNode(true);
   const offerTitleElement = offerElement.querySelector('.popup__title');
   const offerAddressElement = offerElement.querySelector('.popup__text--address');
@@ -106,11 +106,5 @@ const getOfferElement = ({author, offer}) => {
   return offerElement;
 };
 
-const createSimilarOffers = ()=>{
-  offers.forEach((item) => {
-    offerElms.push(getOfferElement(item));
-  });
-};
 
-
-export {createSimilarOffers, getOfferElement};
+export {createOfferElement};

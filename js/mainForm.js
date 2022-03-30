@@ -1,5 +1,6 @@
 import {initSlider} from './noUiSlider.js';
 import {disableElements, enableElements} from './utils.js';
+import {sendData} from './api.js';
 
 const form = document.querySelector('#main-form');
 const capacityField = form.querySelector('#capacity');
@@ -24,6 +25,8 @@ const MIN_TYPE_PRICE_AMOUNT = {
   house: 5000,
   palace: 10000
 };
+
+const FORM_ACTION = 'https://25.javascript.pages.academy/keksobooking';
 
 const pristine = new Pristine(form, {
   classTo: 'ad-form__element',
@@ -110,8 +113,21 @@ function submitHandler(evt){
 
   const formIsValid = pristine.validate();
   if(formIsValid){
+    sendData(
+      FORM_ACTION,
+      () => onSuccess(),
+      (err) => onFail(err),
+      new FormData(evt.target)
+    );
     enableElements([submitBtn, resetBtn]);
   }
+}
+
+function onSuccess(){
+  return 'success';
+}
+function onFail(err){
+  return err;
 }
 
 export {mainFormHandler};
