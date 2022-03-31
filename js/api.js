@@ -21,7 +21,6 @@ const getData = (address, onSuccess, onError) => {
 };
 
 const sendData = (action, onSuccess, onFail, body) => {
-  console.log('fetch');
   fetch(
     action,
     {
