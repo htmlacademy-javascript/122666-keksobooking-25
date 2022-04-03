@@ -20,28 +20,25 @@ const getData = (address, onSuccess, onError) => {
     });
 };
 
-const sendData = (action, onSuccess, onFail, body) => {
-  console.log('fetch');
+const sendData = (action, onSuccess, onError, body) => {
   fetch(
     action,
     {
       method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
       body,
     },
   )
     .then((response) => {
       if (response.ok) {
-        onSuccess();
+        setTimeout(() => {
+          onSuccess();
+        }, 3000);
       } else {
-        onFail();
+        onError();
       }
     })
     .catch((err) => {
-      onFail(err);
+      onError(err);
     });
 };
 

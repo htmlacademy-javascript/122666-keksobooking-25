@@ -630,6 +630,10 @@ fieldset {
   border: 4px solid #ffaa99;
   border-radius: 8px;
 }
+.ad-form__submit[disabled='']{
+  opacity: 0.3;
+  pointer-events: none;
+}
 
 .ad-form__submit:hover,
 .ad-form__submit:focus {
@@ -658,6 +662,11 @@ fieldset {
   border: 0;
   background: none;
   cursor: pointer;
+}
+
+.ad-form__reset[disabled='']{
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 .ad-form__reset:focus {

@@ -25,7 +25,7 @@ function enableForm(form){
 function disableForm(selector){
   const form = document.querySelector(selector);
   const selectElements = form.querySelectorAll('select:not(fieldset select)');
-  const fieldsetElements = form.querySelectorAll('fieldset');
+  const fieldsetElements = form.querySelectorAll('fieldset:not(.ad-form__element--submit');
   const submitElm = form.querySelector('[type="submit"]');
   const resetElm = form.querySelector('[type="reset"]');
 

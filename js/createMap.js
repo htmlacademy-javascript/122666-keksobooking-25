@@ -8,15 +8,18 @@ const TOKIO_COORDS = {
   lng: 139.692,
 };
 const PINS_NUMBER = 5;
+const MAP_ZOOM_INDEX = 12;
 const OFFERS_DATA_LINK = 'https://25.javascript.pages.academy/keksobooking/data';
 const adressTargetElm = document.querySelector('#address');
 
+let map, mainPinMarker;
+
 const createMap = () => {
-  const map = L.map('map-canvas')
+  map = L.map('map-canvas')
     .on('load', () => {
       activatePage();
     })
-    .setView(TOKIO_COORDS, 12);
+    .setView(TOKIO_COORDS, MAP_ZOOM_INDEX);
 
   L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -31,7 +34,7 @@ const createMap = () => {
     iconAnchor: [26, 52],
   });
 
-  const mainPinMarker = L.marker(
+  mainPinMarker = L.marker(
     TOKIO_COORDS,
     {
       draggable: true,
@@ -91,4 +94,15 @@ function createMarker(location, icon){
   });
 }
 
-export {createMap};
+const resetAddresField = ()=>{
+  adressTargetElm.value = `${TOKIO_COORDS.lat}, ${TOKIO_COORDS.lng}`;
+};
+
+const resetMap = ()=>{
+  map.closePopup();
+  mainPinMarker.setLatLng(TOKIO_COORDS);
+  map.setView(TOKIO_COORDS, MAP_ZOOM_INDEX);
+  resetAddresField();
+};
+
+export {createMap, resetMap, resetAddresField};
