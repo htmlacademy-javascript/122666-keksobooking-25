@@ -394,6 +394,15 @@ fieldset {
           box-shadow: 0 0 2px 2px #ff6547;
 }
 
+.ad-form__element [type="number"] {
+  -moz-appearance: textfield;
+}
+.ad-form__element [type="number"]::-webkit-outer-spin-button,
+.ad-form__element [type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .ad-form__element--time {
   -ms-flex-preferred-size: 50%;
       flex-basis: 50%;
@@ -1062,3 +1071,16 @@ fieldset {
 .hidden {
   display: none;
 }
+
+.has-danger .text-help {
+  color: #ff5635;
+  font-size: 12px;
+  line-height: 14px;
+}
+
+.has-danger input,
+.has-danger select {
+  border: 1px solid #ff5635;
+}
+
+
