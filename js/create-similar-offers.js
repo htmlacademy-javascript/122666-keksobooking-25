@@ -13,7 +13,6 @@ const offerTemplate = document.querySelector('#card').content.querySelector('.po
 
 
 const createOfferElement = ({author, offer}) => {
-  console.log(offer.price);
   const offerElement = offerTemplate.cloneNode(true);
   const offerTitleElement = offerElement.querySelector('.popup__title');
   const offerAddressElement = offerElement.querySelector('.popup__text--address');

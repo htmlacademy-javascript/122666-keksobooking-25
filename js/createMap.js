@@ -1,64 +1,15 @@
 import {activatePage} from './page-state-controller.js';
 import {getData} from './api.js';
 import {createOfferElement} from './create-similar-offers.js';
-import {isInRange} from './utils.js';
-const filtersForm = document.querySelector('.map__filters');
-const typeField = filtersForm.querySelector('#housing-type');
-const priceField = filtersForm.querySelector('#housing-price');
-const roomsField = filtersForm.querySelector('#housing-rooms');
-const guestsField = filtersForm.querySelector('#housing-guests');
-const filtersCheckboxes = filtersForm.querySelectorAll('.map__checkbox');
-const filtersFields = [
-  {
-    elm: typeField,
-    initialValue: typeField.value
-  },
-  {
-    elm: priceField,
-    initialValue: priceField.value
-  },
-  {
-    elm: roomsField,
-    initialValue: roomsField.value
-  },
-  {
-    elm: guestsField,
-    initialValue: guestsField.value
-  },
-];
+import {setAddressValue} from './mainForm.js';
 
-const priceRanges = {
-  low: {
-    min: 0,
-    max: 9999,
-  },
-  middle: {
-    min:10000,
-    max: 49999,
-  },
-  high: {
-    min:50000,
-    max: 500000
-  }
-};
-
-const clearFilters = ()=>{
-  filtersFields.forEach((field)=>{
-    field.elm.value = field.initialValue;
-  });
-  filtersCheckboxes.forEach((checkbox)=>{
-    checkbox.checked = false;
-  });
-};
-
-const TOKIO_COORDS = {
+const INITIAL_COORDS = {
   lat: 35.6894,
   lng: 139.692,
 };
 const PINS_NUMBER = 10;
 const MAP_ZOOM_INDEX = 12;
 const OFFERS_DATA_LINK = 'https://25.javascript.pages.academy/keksobooking/data';
-const adressTargetElm = document.querySelector('#address');
 const mainPinIcon = L.icon({
   iconUrl: './img/main-pin.svg',
   iconSize: [52, 52],
@@ -72,31 +23,49 @@ const pinIcon = L.icon({
 
 let map, mainPinMarker, markersLayer, offers;
 
-typeField.addEventListener('change', ()=>{
-  const sortedOffers = offers.slice().sort(compareOffers);
-  updateMarkers(sortedOffers);
-});
-priceField.addEventListener('change', ()=>{
-  const sortedOffers = offers.slice().sort(compareOffers);
-  updateMarkers(sortedOffers);
-});
-
 const createMap = () => {
+  initLeafletMap();
+  addTilesToMap();
+  addMainMarker();
+  addSimilarMarkersLayer();
+  setAddressValue();
+  getData(OFFERS_DATA_LINK, onGetDataSuccess, onGetDataError);
+};
+const updateMarkers = (data)=>{
+  clearMarkers();
+  const offerToShow = data.slice(0, PINS_NUMBER);
+  offerToShow.forEach((offer) => {
+    addMarker(offer);
+  });
+};
+const resetMap = ()=>{
+  map.closePopup();
+  mainPinMarker.setLatLng(INITIAL_COORDS);
+  map.setView(INITIAL_COORDS, MAP_ZOOM_INDEX);
+  updateMarkers(offers);
+  setAddressValue();
+};
+
+function initLeafletMap(){
   map = L.map('map-canvas')
     .on('load', () => {
       activatePage();
     })
-    .setView(TOKIO_COORDS, MAP_ZOOM_INDEX);
+    .setView(INITIAL_COORDS, MAP_ZOOM_INDEX);
+}
 
+function addTilesToMap(){
   L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     },
   ).addTo(map);
+}
 
+function addMainMarker(){
   mainPinMarker = L.marker(
-    TOKIO_COORDS,
+    INITIAL_COORDS,
     {
       draggable: true,
       icon: mainPinIcon,
@@ -105,22 +74,20 @@ const createMap = () => {
 
   mainPinMarker.addTo(map);
   mainPinMarker.on('moveend', (evt) => {
-    const latLng = evt.target.getLatLng();
-    adressTargetElm.value = `${latLng.lat.toFixed(5)}, ${latLng.lng.toFixed(5)}`;
+    setAddressValue(evt.target.getLatLng());
   });
+}
 
-  adressTargetElm.value = `${TOKIO_COORDS.lat.toFixed(5)}, ${TOKIO_COORDS.lng.toFixed(5)}`;
-
+function addSimilarMarkersLayer(){
   markersLayer = L.layerGroup().addTo(map);
-  getData(OFFERS_DATA_LINK, onSuccess, onError);
-};
+}
 
-function onSuccess(data){
+function onGetDataSuccess(data){
   offers = data;
   updateMarkers(offers);
 }
 
-function onError(err){
+function onGetDataError(err){
   const errorElm = document.createElement('div');
   errorElm.style.position = 'fixed';
   errorElm.style.top = 0;
@@ -137,14 +104,6 @@ function onError(err){
   setTimeout(() => {
     errorElm.remove();
   }, 5000);
-}
-
-function updateMarkers(data){
-  clearMarkers();
-  const offerToShow = data.slice(0, PINS_NUMBER);
-  offerToShow.forEach((offer) => {
-    addMarker(offer);
-  });
 }
 
 function addMarker(data){
@@ -165,34 +124,8 @@ function createMarker(location, icon){
   });
 }
 
-const resetAddresField = ()=>{
-  adressTargetElm.value = `${TOKIO_COORDS.lat}, ${TOKIO_COORDS.lng}`;
-};
-
-const resetMap = ()=>{
-  map.closePopup();
-  mainPinMarker.setLatLng(TOKIO_COORDS);
-  map.setView(TOKIO_COORDS, MAP_ZOOM_INDEX);
-  resetAddresField();
-};
-
 function clearMarkers(){
   markersLayer.clearLayers();
 }
 
-function compareOffers(offerA, offerB){
-  const rankA = getOfferRank(offerA);
-  const rankB = getOfferRank(offerB);
-  return rankB - rankA;
-}
-function getOfferRank(offer){
-  let rank = 0;
-  if(typeField.value === offer.offer.type){
-    rank+=1;
-  } else if(typeField.value === 'any'){
-    rank-=1;
-  }
-
-  return rank;
-}
-export {createMap, resetMap, resetAddresField, clearFilters};
+export {createMap, resetMap, updateMarkers, INITIAL_COORDS ,map, offers};
