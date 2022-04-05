@@ -62,6 +62,8 @@ const disableElements=(elms)=>{
   }
 };
 
+const isInRange=(val, min, max)=> val >= min && val <=max;
+
 export {
   getFloatingPointNumber,
   getNumberFromRange,
@@ -69,4 +71,5 @@ export {
   hideElement,
   disableElements,
   enableElements,
+  isInRange
 };

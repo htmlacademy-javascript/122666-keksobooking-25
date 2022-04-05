@@ -1,8 +1,7 @@
 import {initSlider} from './noUiSlider.js';
 import {disableElements, enableElements} from './utils.js';
 import {sendData} from './api.js';
-import {resetMap, resetAddresField} from './createMap.js';
-import {clearFilters} from './filters.js';
+import {resetMap, resetAddresField, clearFilters} from './createMap.js';
 
 const form = document.querySelector('#main-form');
 
