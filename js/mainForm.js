@@ -3,6 +3,7 @@ import {disableElements, enableElements} from './utils.js';
 import {sendData} from './api.js';
 import {resetMap, INITIAL_COORDS} from './createMap.js';
 import {clearFilters} from './filters.js';
+import {previewHandler} from './imageChooser.js';
 
 const MAX_CAPACITY_AMOUNT = {
   '0':100,
@@ -20,6 +21,7 @@ const MIN_TYPE_PRICE_AMOUNT = {
 const FORM_ACTION = 'https://25.javascript.pages.academy/keksobooking';
 const form = document.querySelector('#main-form');
 const avatarField = form.querySelector('#avatar');
+const avatarTarget = avatarField.closest('fieldset').querySelector('.ad-form-header__preview');
 const titleField = form.querySelector('#title');
 const addressField = form.querySelector('#address');
 const typeField = form.querySelector('#type');
@@ -31,6 +33,7 @@ const capacityField = form.querySelector('#capacity');
 const featuresCheckboxes = form.querySelectorAll('.features__checkbox');
 const descriptionField = form.querySelector('#description');
 const imagesField = form.querySelector('#images');
+const imagesTarget = imagesField.closest('fieldset').querySelector('.ad-form__photo');
 const formFields = [
   {
     elm: avatarField,
@@ -98,6 +101,9 @@ const initMainForm = ()=>{
     priceField.value = sliderElement.noUiSlider.get();
     pristine.validate(priceField);
   });
+  avatarField.addEventListener('change', (evt)=>{
+    previewHandler(evt.target, avatarTarget);
+  });
   roomsField.addEventListener('change', ()=>{
     pristine.validate(capacityField);
   });
@@ -108,6 +114,9 @@ const initMainForm = ()=>{
   });
   timeOutField.addEventListener('change', ()=> {
     changeDependentField(timeInField, timeOutField.value);
+  });
+  imagesField.addEventListener('change', (evt)=>{
+    previewHandler(evt.target, imagesTarget);
   });
 };
 const setAddressValue = (coords)=>{
