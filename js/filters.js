@@ -1,5 +1,5 @@
 import {isInRange, debounce} from './utils.js';
-import {updateMarkers, map, offers} from './createMap.js';
+import {updateMarkers, closePopups, getOffers} from './createMap.js';
 
 const priceRanges = {
   low: {
@@ -24,30 +24,36 @@ const filtersCheckboxes = Array.from(filtersForm.querySelectorAll('.map__checkbo
 const filtersCheckboxesField = filtersForm.querySelector('#housing-features');
 const filtersFields = [
   {
-    elm: typeField,
+    element: typeField,
     initialValue: typeField.value
   },
   {
-    elm: priceField,
+    element: priceField,
     initialValue: priceField.value
   },
   {
-    elm: roomsField,
+    element: roomsField,
     initialValue: roomsField.value
   },
   {
-    elm: guestsField,
+    element: guestsField,
     initialValue: guestsField.value
   },
 ];
 
-const clearFilters = ()=>{
+const clearFilters = function(){
   filtersFields.forEach((field)=>{
-    field.elm.value = field.initialValue;
+    field.element.value = field.initialValue;
   });
   filtersCheckboxes.forEach((checkbox)=>{
     checkbox.checked = false;
   });
+};
+const getFiltersForm = function(){
+  return {
+    element: filtersForm,
+    selector: '.map__filters'
+  };
 };
 
 typeField.addEventListener('change', debounce(filterOffers, 500));
@@ -57,30 +63,28 @@ guestsField.addEventListener('change', debounce(filterOffers, 500));
 filtersCheckboxesField.addEventListener('change', debounce(filterOffers, 500));
 
 function filterOffers(){
-  map.closePopup();
+  closePopups();
+  const offers = getOffers();
   const filteredOffers = offers.slice().filter(({offer}) => {
-    const offerIsTypeOf = typeField.value === 'any' || offer.type === typeField.value;
-    const offerIsPriceOF = priceField.value === 'any' || isInRange(offer.price, priceRanges[priceField.value].min, priceRanges[priceField.value].max);
-    const offerIsRoomsOf = roomsField.value === 'any' || offer.rooms === Number(roomsField.value);
-    const offerIsGuestsOf = guestsField.value === 'any' || offer.guests === Number(guestsField.value);
+    const offerHasSelectedType = typeField.value === 'any' || offer.type === typeField.value;
+    const offerHasSelectedPrice = priceField.value === 'any' || isInRange(offer.price, priceRanges[priceField.value].min, priceRanges[priceField.value].max);
+    const offerHasSelectedRooms = roomsField.value === 'any' || offer.rooms === Number(roomsField.value);
+    const offerHasSelectedGuests = guestsField.value === 'any' || offer.guests === Number(guestsField.value);
     const checkedFeatures = filtersCheckboxes.map((item)=>{
       if(item.checked){
         return item.value;
       }
     });
-    const offerHasFeatures = hasOfferFeatures(offer.features, checkedFeatures);
 
-    if(offerIsTypeOf && offerIsPriceOF && offerIsRoomsOf && offerIsGuestsOf && offerHasFeatures) {
+    if(offerHasSelectedType && offerHasSelectedPrice && offerHasSelectedRooms && offerHasSelectedGuests && offerHasFeatures(offer.features, checkedFeatures)) {
       return offer;
     }
   });
 
   updateMarkers(filteredOffers);
 }
-
-function hasOfferFeatures(offerFeatures, checkedFeatures){
+function offerHasFeatures(offerFeatures, checkedFeatures){
   return offerFeatures && offerFeatures.length && checkedFeatures.length && checkedFeatures.filter((feature)=>feature).every((item)=> offerFeatures.includes(item));
 }
 
-export {clearFilters};
-
+export {clearFilters, getFiltersForm};
