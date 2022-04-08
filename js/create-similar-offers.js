@@ -8,11 +8,9 @@ const OFFER_TYPES = {
   palace: 'Дворец',
   hotel: 'Отель'
 };
-
 const offerTemplate = document.querySelector('#card').content.querySelector('.popup');
 
-
-const createOfferElement = ({author, offer}) => {
+const createOfferElement = function({author, offer}){
   const offerElement = offerTemplate.cloneNode(true);
   const offerTitleElement = offerElement.querySelector('.popup__title');
   const offerAddressElement = offerElement.querySelector('.popup__text--address');

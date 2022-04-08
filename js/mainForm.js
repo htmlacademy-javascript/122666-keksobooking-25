@@ -1,9 +1,9 @@
-import {initSlider} from './noUiSlider.js';
 import {disableElements, enableElements} from './utils.js';
 import {sendData} from './api.js';
-import {resetMap, INITIAL_COORDS} from './createMap.js';
+import {resetMap, INITIAL_COORDINATES} from './createMap.js';
 import {clearFilters} from './filters.js';
-import {previewHandler} from './imageChooser.js';
+import {addImagePreview} from './imageChooser.js';
+import {initPristine, validateForm, validateField} from './validation.js';
 
 const MAX_CAPACITY_AMOUNT = {
   '0':100,
@@ -19,6 +19,7 @@ const MIN_TYPE_PRICE_AMOUNT = {
   palace: 10000
 };
 const FORM_ACTION = 'https://25.javascript.pages.academy/keksobooking';
+const ERROR_MESSAGE = 'Не удалось отправить данные';
 const form = document.querySelector('#main-form');
 const avatarField = form.querySelector('#avatar');
 const avatarTarget = avatarField.closest('fieldset').querySelector('.ad-form-header__preview');
@@ -26,9 +27,9 @@ const titleField = form.querySelector('#title');
 const addressField = form.querySelector('#address');
 const typeField = form.querySelector('#type');
 const priceField = form.querySelector('#price');
-const timeInField = form.querySelector('[name="timein"]');
-const timeOutField = form.querySelector('[name="timeout"]');
-const roomsField = form.querySelector('[name="rooms"]');
+const timeInField = form.querySelector('#timein');
+const timeOutField = form.querySelector('#timeout');
+const roomsField = form.querySelector('#room_number');
 const capacityField = form.querySelector('#capacity');
 const featuresCheckboxes = form.querySelectorAll('.features__checkbox');
 const descriptionField = form.querySelector('#description');
@@ -36,45 +37,45 @@ const imagesField = form.querySelector('#images');
 const imagesTarget = imagesField.closest('fieldset').querySelector('.ad-form__photo');
 const formFields = [
   {
-    elm: avatarField,
+    element: avatarField,
     value: avatarField.value
   },
   {
-    elm: titleField,
+    element: titleField,
     value: titleField.value
   },
   {
-    elm: typeField,
+    element: typeField,
     value: typeField.value
   },
   {
-    elm: timeInField,
+    element: timeInField,
     value: timeInField.value
   },
   {
-    elm: timeOutField,
+    element: timeOutField,
     value: timeOutField.value
   },
   {
-    elm: roomsField,
+    element: roomsField,
     value: roomsField.value
   },
   {
-    elm: capacityField,
+    element: capacityField,
     value: capacityField.value
   },
   {
-    elm: descriptionField,
+    element: descriptionField,
     value: descriptionField.value
   },
   {
-    elm: imagesField,
+    element: imagesField,
     value: imagesField.value
   },
 ];
 const sliderElement = form.querySelector('#price-slider');
-const submitBtn = form.querySelector('[type="submit"]');
-const resetBtn = form.querySelector('[type="reset"]');
+const submitButton = form.querySelector('[type="submit"]');
+const resetButton = form.querySelector('[type="reset"]');
 const priceFieldOptions = {
   range: {
     min: Number(priceField.min),
@@ -85,30 +86,45 @@ const priceFieldOptions = {
   connect: 'lower',
 };
 const successMessageTemplate = document.querySelector('#success');
-const successMessageElm = successMessageTemplate.content.querySelector('.success').cloneNode(true);
+const successMessageElement = successMessageTemplate.content.querySelector('.success').cloneNode(true);
 const errorMessageTemplate = document.querySelector('#error');
-const errorMessageElm = errorMessageTemplate.content.querySelector('.error').cloneNode(true);
-const errorMessageTarget = errorMessageElm.querySelector('.error__message');
-let pristine;
-const initMainForm = ()=>{
-  resetBtn.addEventListener('click', resetHandler);
+const errorMessageElement = errorMessageTemplate.content.querySelector('.error').cloneNode(true);
+const errorMessageTarget = errorMessageElement.querySelector('.error__message');
+const fieldsToValidate = [
+  {
+    element: capacityField,
+    cb: validateCapacity,
+    message: 'The value is not corresponding rooms number'
+  },
+  {
+    element: priceField,
+    cb: validatePrice,
+    message: 'The value and selected type are not corresponding'
+  },
+];
 
+const initMainForm = function(){
+  noUiSlider.create(sliderElement, priceFieldOptions);
+  initPristine(form, fieldsToValidate);
+  resetButton.addEventListener('click', onResetButtonClick);
+  form.addEventListener('submit', onFormSubmit);
   sliderElement.noUiSlider.on('update', () => {
     priceField.value = sliderElement.noUiSlider.get();
-  });
-  form.addEventListener('submit', submitHandler);
-  sliderElement.noUiSlider.on('update', () => {
-    priceField.value = sliderElement.noUiSlider.get();
-    pristine.validate(priceField);
+    validateField(priceField);
   });
   avatarField.addEventListener('change', (evt)=>{
-    previewHandler(evt.target, avatarTarget);
+    addImagePreview(evt.target, avatarTarget);
   });
   roomsField.addEventListener('change', ()=>{
-    pristine.validate(capacityField);
+    validateField(capacityField);
   });
-  priceField.addEventListener('change', onPriceFieldChange);
-  typeField.addEventListener('change', onTypeFieldChange);
+  priceField.addEventListener('change', (evt)=>{
+    sliderElement.noUiSlider.set(evt.target.value);
+  });
+  typeField.addEventListener('change', (evt)=>{
+    const minPrice = MIN_TYPE_PRICE_AMOUNT[evt.target.value];
+    priceField.placeholder = minPrice;
+  });
   timeInField.addEventListener('change', ()=> {
     changeDependentField(timeOutField, timeInField.value);
   });
@@ -116,40 +132,51 @@ const initMainForm = ()=>{
     changeDependentField(timeInField, timeOutField.value);
   });
   imagesField.addEventListener('change', (evt)=>{
-    previewHandler(evt.target, imagesTarget);
+    addImagePreview(evt.target, imagesTarget);
   });
 };
-const setAddressValue = (coords)=>{
-  const latLng = coords || INITIAL_COORDS;
-  addressField.value = `${latLng.lat.toFixed(5)}, ${latLng.lng.toFixed(5)}`;
+const setAddressValue = function(coordinates = INITIAL_COORDINATES){
+  addressField.value = `${coordinates.lat.toFixed(5)}, ${coordinates.lng.toFixed(5)}`;
+};
+const getMainForm = function(){
+  return {
+    element: form,
+    selector: '.ad-form'
+  };
 };
 
-initSlider(sliderElement, priceFieldOptions);
-initPristine();
-
-function initPristine(){
-  pristine = new Pristine(form, {
-    classTo: 'ad-form__element',
-    errorTextParent:'ad-form__element',
-  });
-
-  pristine.addValidator(
-    capacityField,
-    validateCapacity,
-    'The value is not corresponding rooms number'
-  );
-  pristine.addValidator(
-    priceField,
-    validatePrice,
-    'The value and selected type are not corresponding'
-  );
+function onFormSubmit(evt){
+  evt.preventDefault();
+  const formIsValid = validateForm();
+  if(formIsValid){
+    disableElements([submitButton, resetButton]);
+    sendData(
+      FORM_ACTION,
+      () => onSendingDataSuccess(),
+      () => onSendingDataError(),
+      new FormData(evt.target)
+    );
+  }
 }
-function onPriceFieldChange(evt){
-  sliderElement.noUiSlider.set(evt.target.value);
+function onResetButtonClick(evt){
+  if(evt) {
+    evt.preventDefault();
+  }
+  resetMap();
+  clearFilters();
+  clearFormFields();
+  setAddressValue();
+  clearCheckboxes();
+  sliderElement.noUiSlider.updateOptions(priceFieldOptions);
 }
-function onTypeFieldChange(evt){
-  const minPrice = MIN_TYPE_PRICE_AMOUNT[evt.target.value];
-  priceField.placeholder = minPrice;
+function onSendingDataSuccess(){
+  enableElements([submitButton, resetButton]);
+  resetButton.click();
+  showMessage('success');
+}
+function onSendingDataError(){
+  enableElements([submitButton, resetButton]);
+  showMessage('error', ERROR_MESSAGE);
 }
 function validateCapacity(value){
   const roomsFieldValue = Number(roomsField.value);
@@ -169,36 +196,12 @@ function validatePrice(value){
 }
 function changeDependentField(field, value){
   if(field.value !== value){
-    field .value = value;
+    field.value = value;
   }
-}
-function submitHandler(evt){
-  evt.preventDefault();
-  const formIsValid = pristine.validate();
-  if(formIsValid){
-    disableElements([submitBtn, resetBtn]);
-    sendData(
-      FORM_ACTION,
-      () => onSendingDataSuccess(),
-      (err) => onSendingDataError(err),
-      new FormData(evt.target)
-    );
-  }
-}
-function resetHandler(evt){
-  if(evt) {
-    evt.preventDefault();
-  }
-  resetMap();
-  clearFilters();
-  clearFormFields();
-  setAddressValue();
-  clearCheckboxes();
-  sliderElement.noUiSlider.updateOptions(priceFieldOptions);
 }
 function clearFormFields(){
   formFields.forEach((field) => {
-    field.elm.value = field.value;
+    field.element.value = field.value;
   });
 }
 function clearCheckboxes(){
@@ -206,41 +209,43 @@ function clearCheckboxes(){
     checkbox.checked = false;
   });
 }
-function onSendingDataSuccess(){
-  enableElements([submitBtn, resetBtn]);
-  resetBtn.click();
-  showMessage('success');
-}
-function onSendingDataError(err){
-  enableElements([submitBtn, resetBtn]);
-  showMessage('error', err);
-}
 function showMessage(type, message){
   if(type === 'success') {
-    document.addEventListener('keydown', closeSuccessMessage);
-    document.body.addEventListener('click', closeSuccessMessage);
-    document.body.insertAdjacentElement('beforeend', successMessageElm);
+    document.body.addEventListener('keydown', onBodyKeydownSuccess);
+    document.body.addEventListener('click', onBodyClickSuccess);
+    document.body.insertAdjacentElement('beforeend', successMessageElement);
   } else {
-    document.addEventListener('keydown', closeErrorMessage);
-    document.body.addEventListener('click', closeErrorMessage);
+    document.body.addEventListener('keydown', onBodyKeydownError);
+    document.body.addEventListener('click', onBodyClickError);
     errorMessageTarget.innerText = message;
-    document.body.insertAdjacentElement('beforeend', errorMessageElm);
+    document.body.insertAdjacentElement('beforeend', errorMessageElement);
   }
 }
-function closeSuccessMessage(evt) {
-  if(evt.key === 'Escape' || evt.type === 'click') {
-    successMessageElm.remove();
-    document.removeEventListener('click', closeSuccessMessage);
-    document.removeEventListener('keydown', closeSuccessMessage);
+function closeSuccessMessage() {
+  successMessageElement.remove();
+  document.removeEventListener('keydown', closeSuccessMessage);
+  document.body.removeEventListener('click', closeSuccessMessage);
+}
+function closeErrorMessage() {
+  errorMessageElement.remove();
+  document.removeEventListener('keydown', closeErrorMessage);
+  document.body.removeEventListener('click', closeErrorMessage);
+}
+function onBodyKeydownSuccess(evt){
+  if(evt.key === 'Escape') {
+    closeSuccessMessage();
   }
 }
-function closeErrorMessage(evt) {
-  if(evt.key === 'Escape' || evt.type === 'click') {
-    errorMessageElm.remove();
-    document.removeEventListener('click', closeErrorMessage);
-    document.removeEventListener('keydown', closeErrorMessage);
+function onBodyClickSuccess(){
+  closeSuccessMessage();
+}
+function onBodyKeydownError(evt){
+  if(evt.key === 'Escape') {
+    closeErrorMessage();
   }
+}
+function onBodyClickError(){
+  closeErrorMessage();
 }
 
-
-export {initMainForm, setAddressValue};
+export {initMainForm, setAddressValue, getMainForm};
