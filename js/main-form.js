@@ -1,8 +1,8 @@
 import {disableElements, enableElements} from './utils.js';
 import {sendData} from './api.js';
-import {resetMap, INITIAL_COORDINATES} from './createMap.js';
+import {resetMap, INITIAL_COORDINATES} from './map.js';
 import {clearFilters} from './filters.js';
-import {addImagePreview} from './imageChooser.js';
+import {addImagePreview, removePreviews} from './choose-image.js';
 import {initPristine, validateForm, validateField} from './validation.js';
 
 const MAX_CAPACITY_AMOUNT = {
@@ -23,7 +23,6 @@ const ERROR_MESSAGE = 'Не удалось отправить данные';
 const form = document.querySelector('#main-form');
 const avatarField = form.querySelector('#avatar');
 const avatarTarget = avatarField.closest('fieldset').querySelector('.ad-form-header__preview');
-const titleField = form.querySelector('#title');
 const addressField = form.querySelector('#address');
 const typeField = form.querySelector('#type');
 const priceField = form.querySelector('#price');
@@ -31,48 +30,8 @@ const timeInField = form.querySelector('#timein');
 const timeOutField = form.querySelector('#timeout');
 const roomsField = form.querySelector('#room_number');
 const capacityField = form.querySelector('#capacity');
-const featuresCheckboxes = form.querySelectorAll('.features__checkbox');
-const descriptionField = form.querySelector('#description');
 const imagesField = form.querySelector('#images');
 const imagesTarget = imagesField.closest('fieldset').querySelector('.ad-form__photo');
-const formFields = [
-  {
-    element: avatarField,
-    value: avatarField.value
-  },
-  {
-    element: titleField,
-    value: titleField.value
-  },
-  {
-    element: typeField,
-    value: typeField.value
-  },
-  {
-    element: timeInField,
-    value: timeInField.value
-  },
-  {
-    element: timeOutField,
-    value: timeOutField.value
-  },
-  {
-    element: roomsField,
-    value: roomsField.value
-  },
-  {
-    element: capacityField,
-    value: capacityField.value
-  },
-  {
-    element: descriptionField,
-    value: descriptionField.value
-  },
-  {
-    element: imagesField,
-    value: imagesField.value
-  },
-];
 const sliderElement = form.querySelector('#price-slider');
 const submitButton = form.querySelector('[type="submit"]');
 const resetButton = form.querySelector('[type="reset"]');
@@ -81,8 +40,7 @@ const priceFieldOptions = {
     min: Number(priceField.min),
     max: Number(priceField.max),
   },
-  start: Number(priceField.dataset.start),
-  step: Number(priceField.dataset.step),
+  start: getStartPriceValue(),
   connect: 'lower',
 };
 const successMessageTemplate = document.querySelector('#success');
@@ -99,18 +57,20 @@ const fieldsToValidate = [
   {
     element: priceField,
     cb: validatePrice,
-    message: 'The value and selected type are not corresponding'
+    message: 'The value and selected type are not corresponding',
   },
 ];
 
-const initMainForm = function(){
+const initMainForm = ()=>{
   noUiSlider.create(sliderElement, priceFieldOptions);
   initPristine(form, fieldsToValidate);
-  resetButton.addEventListener('click', onResetButtonClick);
+  setPriceMin();
+  resetButton.addEventListener('click', ()=>{
+    onResetButtonClick();
+  });
   form.addEventListener('submit', onFormSubmit);
   sliderElement.noUiSlider.on('update', () => {
     priceField.value = sliderElement.noUiSlider.get();
-    validateField(priceField);
   });
   avatarField.addEventListener('change', (evt)=>{
     addImagePreview(evt.target, avatarTarget);
@@ -121,10 +81,7 @@ const initMainForm = function(){
   priceField.addEventListener('change', (evt)=>{
     sliderElement.noUiSlider.set(evt.target.value);
   });
-  typeField.addEventListener('change', (evt)=>{
-    const minPrice = MIN_TYPE_PRICE_AMOUNT[evt.target.value];
-    priceField.placeholder = minPrice;
-  });
+  typeField.addEventListener('change', setPriceMin);
   timeInField.addEventListener('change', ()=> {
     changeDependentField(timeOutField, timeInField.value);
   });
@@ -135,16 +92,24 @@ const initMainForm = function(){
     addImagePreview(evt.target, imagesTarget);
   });
 };
-const setAddressValue = function(coordinates = INITIAL_COORDINATES){
+const setAddressValue = (coordinates = INITIAL_COORDINATES)=>{
   addressField.value = `${coordinates.lat.toFixed(5)}, ${coordinates.lng.toFixed(5)}`;
 };
-const getMainForm = function(){
-  return {
-    element: form,
-    selector: '.ad-form'
-  };
-};
+const getMainForm = ()=>({
+  element: form,
+  selector: '.ad-form'
+});
 
+function setPriceMin(){
+  const minPrice = getStartPriceValue();
+  priceField.min = minPrice;
+  priceField.placeholder = minPrice;
+  priceField.value = minPrice;
+  sliderElement.noUiSlider.set(minPrice);
+}
+function getStartPriceValue(){
+  return MIN_TYPE_PRICE_AMOUNT[typeField.value];
+}
 function onFormSubmit(evt){
   evt.preventDefault();
   const formIsValid = validateForm();
@@ -162,16 +127,18 @@ function onResetButtonClick(evt){
   if(evt) {
     evt.preventDefault();
   }
-  resetMap();
   clearFilters();
-  clearFormFields();
-  setAddressValue();
-  clearCheckboxes();
+  form.reset();
+  removePreviews(avatarField, avatarTarget);
+  removePreviews(imagesField, imagesTarget);
   sliderElement.noUiSlider.updateOptions(priceFieldOptions);
+  resetMap();
 }
 function onSendingDataSuccess(){
   enableElements([submitButton, resetButton]);
   resetButton.click();
+  setPriceMin();
+  setAddressValue();
   showMessage('success');
 }
 function onSendingDataError(){
@@ -199,16 +166,6 @@ function changeDependentField(field, value){
     field.value = value;
   }
 }
-function clearFormFields(){
-  formFields.forEach((field) => {
-    field.element.value = field.value;
-  });
-}
-function clearCheckboxes(){
-  featuresCheckboxes.forEach((checkbox)=>{
-    checkbox.checked = false;
-  });
-}
 function showMessage(type, message){
   if(type === 'success') {
     document.body.addEventListener('keydown', onBodyKeydownSuccess);
@@ -223,12 +180,12 @@ function showMessage(type, message){
 }
 function closeSuccessMessage() {
   successMessageElement.remove();
-  document.removeEventListener('keydown', closeSuccessMessage);
+  document.body.removeEventListener('keydown', closeSuccessMessage);
   document.body.removeEventListener('click', closeSuccessMessage);
 }
 function closeErrorMessage() {
   errorMessageElement.remove();
-  document.removeEventListener('keydown', closeErrorMessage);
+  document.body.removeEventListener('keydown', closeErrorMessage);
   document.body.removeEventListener('click', closeErrorMessage);
 }
 function onBodyKeydownSuccess(evt){

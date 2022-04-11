@@ -1,15 +1,15 @@
 import {disableElements, enableElements} from './utils.js';
 import {getFiltersForm} from './filters.js';
-import {getMainForm} from './mainForm.js';
+import {getMainForm} from './main-form.js';
 
 const mainForm = getMainForm();
 const filterForm = getFiltersForm();
 
-const deactivatePage = function(){
+const deactivatePage = ()=>{
   disableForm(mainForm);
   disableForm(filterForm);
 };
-const enableForm = function(form){
+const enableForm = (form)=>{
   const disabledElements = form.element.querySelectorAll('[disabled]');
   enableElements(disabledElements);
   form.element.classList.forEach((classString)=>{

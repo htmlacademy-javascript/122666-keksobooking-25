@@ -1,7 +1,7 @@
 import {enableForm} from './page-state-controller.js';
 import {getData} from './api.js';
 import {createOfferElement} from './create-similar-offers.js';
-import {setAddressValue, initMainForm, getMainForm} from './mainForm.js';
+import {setAddressValue, initMainForm, getMainForm} from './main-form.js';
 import {getFiltersForm} from './filters.js';
 
 const ERROR_STYLES = {
@@ -37,43 +37,41 @@ const pinIcon = L.icon({
 
 let map, mainPinMarker, markersLayer, offers;
 
-const createMap = function(){
+const createMap = ()=>{
   initLeafletMap();
   addTilesToMap();
   addMainMarker();
   addSimilarMarkersLayer();
   setAddressValue();
-  getData(OFFERS_DATA_LINK, onGetDataSuccess, onGetDataError);
 };
-const closePopups = function(){
+const closePopups = ()=>{
   map.closePopup();
 };
-const updateMarkers = function(data){
+const updateMarkers = (data)=>{
   clearMarkers();
   const offerToShow = data.slice(0, PINS_NUMBER);
   offerToShow.forEach((offer) => {
     addMarker(offer);
   });
 };
-const resetMap = function(){
+const resetMap = ()=>{
   closePopups();
   mainPinMarker.setLatLng(INITIAL_COORDINATES);
   map.setView(INITIAL_COORDINATES, MAP_ZOOM_INDEX);
   updateMarkers(offers);
-  setAddressValue();
 };
-const getOffers = function(){
-  return offers;
-};
+const getOffers = ()=>offers;
 
 function initLeafletMap(){
   map = L.map('map-canvas')
-    .on('load', () => {
-      initMainForm();
-      const mainForm = getMainForm();
-      enableForm(mainForm);
-    })
+    .on('load', onMapLoad)
     .setView(INITIAL_COORDINATES, MAP_ZOOM_INDEX);
+}
+function onMapLoad(){
+  getData(OFFERS_DATA_LINK, onGetDataSuccess, onGetDataError);
+  initMainForm();
+  const mainForm = getMainForm();
+  enableForm(mainForm);
 }
 function addTilesToMap(){
   L.tileLayer(
@@ -93,7 +91,7 @@ function addMainMarker(){
   );
 
   mainPinMarker.addTo(map);
-  mainPinMarker.on('moveend', (evt) => {
+  mainPinMarker.on('drag', (evt) => {
     setAddressValue(evt.target.getLatLng());
   });
 }

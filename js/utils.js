@@ -1,14 +1,4 @@
-
-
-const shuffleArray = function(array){
-  // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-};
-
-const getNumberFromRange = function(min, max){
+const getNumberFromRange = (min, max)=>{
   // https://up.htmlacademy.ru/profession/react/9/javascript/25/tasks/7
   const lower = Math.ceil(Math.min(Math.abs(min), Math.abs(max)));
   const upper = Math.floor(Math.max(Math.abs(min), Math.abs(max)));
@@ -16,45 +6,31 @@ const getNumberFromRange = function(min, max){
   return Math.floor(result);
 };
 
-const randomizeArr = function(arr){
-  const newArr = arr.slice(0);
-  shuffleArray(newArr);
-  const sliceRandomIndex = getNumberFromRange(1, newArr.length-1);
-  return newArr.slice(0, sliceRandomIndex);
-};
-
-const getFloatingPointNumber = function(min, max, numberOfDigits){
-  // https://up.htmlacademy.ru/profession/react/9/javascript/25/tasks/7
-  const lower = Math.min(Math.abs(min), Math.abs(max));
-  const upper = Math.max(Math.abs(min), Math.abs(max));
-  const result = Math.random() * (upper - lower) + lower;
-  return +result.toFixed(numberOfDigits);
-};
-
-const hideElement = function(element){
+const hideElement = (element)=>{
   element.classList.add('hidden');
 };
 
-const enableElement = function(element){
+const enableElement = (element)=>{
   if(element){
-    element.removeAttribute('disabled');
+    element.disabled = false;
   }
 };
 
-const disableElement = function(element){
+const disableElement = (element)=>{
   if(element){
-    element.setAttribute('disabled', '');
+    element.disabled = true;
   }
 };
 
-const enableElements = function(elements){
+const enableElements = (elements)=>{
   if(elements.length){
     elements.forEach((element)=>{
       enableElement(element);
     });
   }
 };
-const disableElements = function(elements){
+
+const disableElements = (elements)=>{
   if(elements.length){
     elements.forEach((element) => {
       disableElement(element);
@@ -62,11 +38,9 @@ const disableElements = function(elements){
   }
 };
 
-const isInRange = function(value, min, max){
-  return value >= min && value <=max;
-};
+const isInRange = (value, min, max)=>value >= min && value <=max;
 
-const debounce = function(callback, timeoutDelay = 500){
+const debounce = (callback, timeoutDelay = 500)=>{
   // Источник - https://up.htmlacademy.ru/profession/react/9/javascript/25/tasks/20
   // Используем замыкания, чтобы id таймаута у нас навсегда приклеился
   // к возвращаемой функции с setTimeout, тогда мы его сможем перезаписывать
@@ -86,9 +60,7 @@ const debounce = function(callback, timeoutDelay = 500){
 };
 
 export {
-  getFloatingPointNumber,
   getNumberFromRange,
-  randomizeArr,
   hideElement,
   disableElements,
   enableElements,

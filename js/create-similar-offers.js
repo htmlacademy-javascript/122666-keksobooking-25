@@ -10,7 +10,7 @@ const OFFER_TYPES = {
 };
 const offerTemplate = document.querySelector('#card').content.querySelector('.popup');
 
-const createOfferElement = function({author, offer}){
+const createOfferElement = ({author, offer})=>{
   const offerElement = offerTemplate.cloneNode(true);
   const offerTitleElement = offerElement.querySelector('.popup__title');
   const offerAddressElement = offerElement.querySelector('.popup__text--address');
@@ -36,7 +36,7 @@ const createOfferElement = function({author, offer}){
   const canShowPhotos = offer && offer.photos && offer.photos.length;
 
   if(canShowAvatar){
-    offerAvatarElement.setAttribute('src',author.avatar);
+    offerAvatarElement.src = author.avatar;
   } else {
     hideElement(offerAvatarElement);
   }
@@ -95,7 +95,7 @@ const createOfferElement = function({author, offer}){
     offerPhotosElement.innerHTML = '';
     offer.photos.forEach((src)=> {
       const image = offerPhotoTemplate.cloneNode();
-      image.setAttribute('src', src);
+      image.src = src;
       offerPhotosElement.appendChild(image);
     });
   } else {
@@ -103,6 +103,5 @@ const createOfferElement = function({author, offer}){
   }
   return offerElement;
 };
-
 
 export {createOfferElement};

@@ -1,6 +1,6 @@
 let pristine;
 
-const initPristine = function(form, fieldsToValidate){
+const initPristine = (form, fieldsToValidate)=>{
   pristine = new Pristine(form, {
     classTo: 'ad-form__element',
     errorTextParent:'ad-form__element',
@@ -10,15 +10,16 @@ const initPristine = function(form, fieldsToValidate){
     pristine.addValidator(
       field.element,
       field.cb,
-      field.message
+      field.message,
     );
   });
 };
-const validateField = function(field){
+const validateField = (field)=>{
   pristine.validate(field);
 };
-const validateForm = function(){
-  return pristine.validate();
+const validateForm = ()=>{
+  const isValid = pristine.validate();
+  return isValid;
 };
 
 export { initPristine, validateField, validateForm };
