@@ -1,5 +1,5 @@
 
-import {createMap} from './createMap.js';
+import {createMap} from './map.js';
 import {deactivatePage} from './page-state-controller.js';
 
 deactivatePage();

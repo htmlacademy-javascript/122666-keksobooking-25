@@ -1,5 +1,5 @@
 import {isInRange, debounce} from './utils.js';
-import {updateMarkers, closePopups, getOffers} from './createMap.js';
+import {updateMarkers, closePopups, getOffers} from './map.js';
 
 const priceRanges = {
   low: {
@@ -22,39 +22,14 @@ const roomsField = filtersForm.querySelector('#housing-rooms');
 const guestsField = filtersForm.querySelector('#housing-guests');
 const filtersCheckboxes = Array.from(filtersForm.querySelectorAll('.map__checkbox'));
 const filtersCheckboxesField = filtersForm.querySelector('#housing-features');
-const filtersFields = [
-  {
-    element: typeField,
-    initialValue: typeField.value
-  },
-  {
-    element: priceField,
-    initialValue: priceField.value
-  },
-  {
-    element: roomsField,
-    initialValue: roomsField.value
-  },
-  {
-    element: guestsField,
-    initialValue: guestsField.value
-  },
-];
 
-const clearFilters = function(){
-  filtersFields.forEach((field)=>{
-    field.element.value = field.initialValue;
-  });
-  filtersCheckboxes.forEach((checkbox)=>{
-    checkbox.checked = false;
-  });
+const clearFilters = ()=>{
+  filtersForm.reset();
 };
-const getFiltersForm = function(){
-  return {
-    element: filtersForm,
-    selector: '.map__filters'
-  };
-};
+const getFiltersForm = ()=>({
+  element: filtersForm,
+  selector: '.map__filters'
+});
 
 typeField.addEventListener('change', debounce(filterOffers, 500));
 priceField.addEventListener('change', debounce(filterOffers, 500));
