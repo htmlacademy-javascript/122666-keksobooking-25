@@ -10,7 +10,7 @@ const initPristine = (form, fieldsToValidate)=>{
     pristine.addValidator(
       field.element,
       field.cb,
-      field.message,
+      field.message
     );
   });
 };
