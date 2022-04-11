@@ -18,7 +18,7 @@ const ERROR_STYLES = {
 };
 const INITIAL_COORDINATES = {
   lat: 35.6894,
-  lng: 139.692,
+  lng: 139.692
 };
 const PINS_NUMBER = 10;
 const MAP_ZOOM_INDEX = 12;
@@ -27,12 +27,12 @@ const ERROR_TEXT = 'Упс! Не удалось получить похожие 
 const mainPinIcon = L.icon({
   iconUrl: './img/main-pin.svg',
   iconSize: [52, 52],
-  iconAnchor: [26, 52],
+  iconAnchor: [26, 52]
 });
 const pinIcon = L.icon({
   iconUrl: './img/pin.svg',
   iconSize: [40, 40],
-  iconAnchor: [20, 40],
+  iconAnchor: [20, 40]
 });
 
 let map, mainPinMarker, markersLayer, offers;
