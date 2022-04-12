@@ -180,13 +180,13 @@ function showMessage(type, message){
 }
 function closeSuccessMessage() {
   successMessageElement.remove();
-  document.body.removeEventListener('keydown', closeSuccessMessage);
-  document.body.removeEventListener('click', closeSuccessMessage);
+  document.body.removeEventListener('keydown', onBodyKeydownSuccess);
+  document.body.removeEventListener('click', onBodyClickSuccess);
 }
 function closeErrorMessage() {
   errorMessageElement.remove();
-  document.body.removeEventListener('keydown', closeErrorMessage);
-  document.body.removeEventListener('click', closeErrorMessage);
+  document.body.removeEventListener('keydown', onBodyKeydownError);
+  document.body.removeEventListener('click', onBodyClickError);
 }
 function onBodyKeydownSuccess(evt){
   if(evt.key === 'Escape') {
